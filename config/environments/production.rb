@@ -77,4 +77,9 @@ SampleApp::Application.configure do
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = ::Logger::Formatter.new
+  
+  # cf: http://railstutorial.jp/chapters/sign-up?version=4.0
+  # Force all access to the app over SSL, use Strict-Transport-Security,
+  # and use secure cookies.
+  config.force_ssl = true
 end
