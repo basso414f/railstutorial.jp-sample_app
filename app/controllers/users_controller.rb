@@ -2,6 +2,7 @@ class UsersController < ApplicationController
   before_action :signed_in_user,  only: [:index, :edit, :update, :destroy]
   before_action :correct_user,    only: [:edit, :update]
   before_action :admin_user,      only: :destroy
+  before_action :no_need_access_user, only: [:new, :create]
   
   def index
     @users = User.paginate(page: params[:page])
@@ -36,16 +37,24 @@ class UsersController < ApplicationController
   end
   
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
-    redirect_to users_url
+    @user = User.find(params[:id])
+
+    unless current_user? @user
+      @user.destroy
+      flash[:success] = "User destroyed."
+      redirect_to users_url      
+    else
+      @users = User.paginate(page: params[:page])
+      flash[:warning] = "You can't destroy yourself."
+      render "index"
+    end
   end
   
   private
 
     def user_params
       params.require(:user).permit(:name, :email, :password,
-                                   :password_confirmation)
+                                    :password_confirmation)
     end
   
   # before actions
@@ -63,6 +72,10 @@ class UsersController < ApplicationController
   
     def admin_user
       redirect_to(root_path) unless current_user.admin?
+    end
+  
+    def no_need_access_user
+      redirect_to(root_path) if signed_in?
     end
   
 end
